@@ -168,3 +168,15 @@ main {
   width: auto;
   height: 1.75rem;
 }
+
+.gif {
+  display: block;
+  width: auto;
+  height: min(229px, 50vw);
+}
+
+.error {
+  font-weight: normal;
+  font-size: clamp(1rem, 6vw, 1.5rem);
+  letter-spacing: 0.02em;
+}
