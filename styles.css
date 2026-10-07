@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Monkey";
-  src: url("fonts/monkey.ttf") format("truetype");
+  src: url("fonts/monkey.woff2") format("woff2");
   font-display: swap;
 }
 
