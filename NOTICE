@@ -1,0 +1,42 @@
+Sleeping Coconut
+Copyright (c) 2026 Sleeping Coconut
+
+The MIT License in LICENSE applies to the original code and assets of this
+repository. The following third-party files are not covered by it and remain
+under their own terms:
+
+coconuts/coconut_1.glb
+  "Coconut (Game Ready 2K PBR)" by Meerschaum Digital
+  https://sketchfab.com/3d-models/coconut-game-ready-2k-pbr-49a8eaee73a943e08fb77049f8b0d16d
+  Licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+
+coconuts/coconut_2.glb
+  "Coconut" by matousekfoto
+  https://sketchfab.com/3d-models/coconut-afe3221922ef4bdbb0cb25a2656e1afb
+  Licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+
+coconuts/coconut_3.glb
+  "Coconut" by Mylom
+  https://sketchfab.com/3d-models/coconut-8ed0693304144515b118ffebd7032371
+  Licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+
+coconuts/three.min.js
+  three.js r186, https://threejs.org
+  Copyright (c) 2010-2025 three.js authors
+  Licensed under the MIT License: https://github.com/mrdoob/three.js/blob/dev/LICENSE
+
+fonts/github.woff2
+  Mona Sans, Copyright (c) GitHub, Inc.
+  https://github.com/github/mona-sans
+  Licensed under the SIL Open Font License 1.1: https://openfontlicense.org
+
+fonts/monkey.woff2
+  Monkey font. Origin and license unknown; not covered by the MIT License.
+
+logos/logo_raquelguma.png
+logos/logo_ust.png
+  Trademarks of their respective owners, used only to link to their sites.
+
+error/nedry.png
+  Still from Jurassic Park (1993), Copyright (c) Universal Pictures.
+  Used for illustrative purposes; not covered by the MIT License.
