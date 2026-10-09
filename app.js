@@ -8,25 +8,33 @@ const coconut = coconuts[Math.floor(Math.random() * coconuts.length)];
 const coco = document.querySelector(".coco");
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+function fail() {
+  coco.classList.remove("ready");
+  coco.classList.add("failed");
+}
+
 const credit = document.createElement("p");
 credit.className = "credit";
 credit.innerHTML = `3D model: <a href="${coconut.source}">${coconut.author}</a><br><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>`;
 
 const autoSpeed = reducedMotion ? 0 : Math.PI * 2 / 30;
-const xAxis = new THREE.Vector3(1, 0, 0);
-const yAxis = new THREE.Vector3(0, 1, 0);
-const upright = new THREE.Quaternion();
 
 function startViewer() {
+  const xAxis = new THREE.Vector3(1, 0, 0);
+  const yAxis = new THREE.Vector3(0, 1, 0);
+  const upright = new THREE.Quaternion();
+
   const canvas = document.createElement("canvas");
   canvas.className = "viewer";
   canvas.setAttribute("role", "img");
   canvas.setAttribute("aria-label", "Sleeping Coconut");
+  canvas.addEventListener("webglcontextlost", fail);
 
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   } catch {
+    fail();
     return;
   }
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -120,7 +128,7 @@ function startViewer() {
       coco.classList.add("ready");
       coco.parentElement.append(credit);
     }));
-  });
+  }, undefined, fail);
 }
 
-startViewer();
+if (window.THREE) startViewer(); else fail();
