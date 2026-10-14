@@ -1,7 +1,7 @@
 const coconuts = [
-  { file: "coconuts/coconut_1.glb", author: "Meerschaum Digital", source: "https://sketchfab.com/3d-models/coconut-game-ready-2k-pbr-49a8eaee73a943e08fb77049f8b0d16d" },
-  { file: "coconuts/coconut_2.glb", author: "matousekfoto", source: "https://sketchfab.com/3d-models/coconut-afe3221922ef4bdbb0cb25a2656e1afb" },
-  { file: "coconuts/coconut_3.glb", author: "Mylom", source: "https://sketchfab.com/3d-models/coconut-8ed0693304144515b118ffebd7032371" }
+  { file: "img/coconut_3d_1.glb", author: "Meerschaum Digital", source: "https://sketchfab.com/3d-models/coconut-game-ready-2k-pbr-49a8eaee73a943e08fb77049f8b0d16d" },
+  { file: "img/coconut_3d_2.glb", author: "matousekfoto", source: "https://sketchfab.com/3d-models/coconut-afe3221922ef4bdbb0cb25a2656e1afb" },
+  { file: "img/coconut_3d_3.glb", author: "Mylom", source: "https://sketchfab.com/3d-models/coconut-8ed0693304144515b118ffebd7032371" }
 ];
 
 const coconut = coconuts[Math.floor(Math.random() * coconuts.length)];
