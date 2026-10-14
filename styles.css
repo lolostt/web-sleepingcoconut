@@ -265,3 +265,8 @@ main {
   font-size: clamp(1rem, 6vw, 1.5rem);
   letter-spacing: 0.02em;
 }
+
+.reason {
+  margin-left: 0.5em;
+  color: var(--muted);
+}
