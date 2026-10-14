@@ -8,6 +8,64 @@ const coconut = coconuts[Math.floor(Math.random() * coconuts.length)];
 const coco = document.querySelector(".coco");
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function prepare(el) {
+  const text = el.textContent;
+  const wrap = document.createElement("span");
+  const ghost = document.createElement("span");
+  const typed = document.createElement("span");
+  const out = document.createTextNode("");
+  wrap.className = "typing";
+  ghost.className = "ghost";
+  ghost.textContent = text;
+  ghost.setAttribute("aria-hidden", "true");
+  typed.append(out);
+  wrap.append(ghost, typed);
+  if (el.matches("a")) el.setAttribute("aria-label", text);
+  el.replaceChildren(wrap);
+  return { typed, out };
+}
+
+async function typeText() {
+  const cursor = document.createElement("span");
+  cursor.className = "cursor";
+
+  const [code, web, store] = document.querySelectorAll(".label");
+  const lines = [
+    [document.querySelector(".email"), [[2500, "hello"], [2400, "@"], [1000, "sleeping"], [400, "coconut"], [450, "."], [350, "com"]]],
+    [code, [[1500, "code:"]]],
+    [web, [[1200, "web:"]]],
+    [store, [[1200, "store:"]]]
+  ].map(([el, parts]) => {
+    const icons = el.matches(".label") ? el.nextElementSibling : null;
+    icons?.classList.add("reveal", "hidden");
+    return { ...prepare(el), parts, icons };
+  });
+
+  document.documentElement.classList.add("ready");
+
+  for (const { typed, out, parts, icons } of lines) {
+    typed.append(cursor);
+    for (const [delay, chunk] of parts) {
+      for (let i = 0; i < chunk.length; i++) {
+        await wait(i ? 60 + Math.random() * 90 : delay);
+        cursor.classList.add("busy");
+        out.appendData(chunk[i]);
+      }
+      cursor.classList.remove("busy");
+    }
+    if (icons) {
+      setTimeout(() => icons.classList.remove("hidden"), 400);
+      await wait(1500);
+    }
+  }
+
+  document.querySelector(".build").append(cursor);
+}
+
+if (!reducedMotion) typeText();
+
 function fail() {
   coco.classList.remove("ready");
   coco.classList.add("failed");
@@ -131,4 +189,4 @@ function startViewer() {
   }, undefined, fail);
 }
 
-if (window.THREE) startViewer(); else fail();
+addEventListener("DOMContentLoaded", () => window.THREE ? startViewer() : fail());
