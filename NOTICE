@@ -18,6 +18,11 @@ fonts/github.woff2
 fonts/monkey.woff2
   Monkey font. Origin and license unknown; not covered by the MIT License.
 
+fonts/opensans.woff2
+  Open Sans, Copyright (c) The Open Sans Project Authors.
+  https://github.com/googlefonts/opensans
+  Licensed under the SIL Open Font License 1.1: https://openfontlicense.org
+
 img/coconut_3d_1.glb
   "Coconut (Game Ready 2K PBR)" by Meerschaum Digital
   https://sketchfab.com/3d-models/coconut-game-ready-2k-pbr-49a8eaee73a943e08fb77049f8b0d16d

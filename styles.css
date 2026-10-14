@@ -11,6 +11,13 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Open Sans";
+  src: url("fonts/opensans.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
   --bg: #ffffff;
   --text: #111111;
@@ -256,6 +263,12 @@ main {
 .brand {
   font-family: "Mona Sans", -apple-system, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
   font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.store {
+  font-family: "Open Sans", -apple-system, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-weight: 700;
   font-size: 1.125rem;
 }
 
