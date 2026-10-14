@@ -181,6 +181,54 @@ main {
   transition: color 0.2s, border-color 0.2s;
 }
 
+.typing {
+  display: inline-grid;
+  text-align: left;
+}
+
+.typing > span {
+  grid-area: 1 / 1;
+}
+
+.typing .ghost {
+  visibility: hidden;
+}
+
+.cursor {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.1em;
+  margin-right: -0.55em;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: blink 1s step-end infinite;
+}
+
+.reveal {
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.reveal.hidden {
+  opacity: 0;
+  transform: translateX(0.75rem);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .js:not(.ready) :is(.email, .label, .icons) {
+    visibility: hidden;
+  }
+}
+
+.cursor.busy {
+  animation: none;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 .email:hover,
 .email:focus-visible {
   color: var(--muted);
