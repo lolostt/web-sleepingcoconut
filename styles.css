@@ -217,6 +217,11 @@ main {
   .js:not(.ready) :is(.email, .label, .icons) {
     visibility: hidden;
   }
+
+  .js:not(.ready) .icons {
+    opacity: 0;
+    transform: translateX(0.75rem);
+  }
 }
 
 .cursor.busy {
