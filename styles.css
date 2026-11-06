@@ -204,15 +204,6 @@ main {
   animation: blink 1s step-end infinite;
 }
 
-.reveal {
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-}
-
-.reveal.hidden {
-  opacity: 0;
-  transform: translateX(0.75rem);
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .js:not(.ready) :is(.email, .label, .icons) {
     visibility: hidden;
@@ -328,6 +319,62 @@ main {
 .store span {
   margin-right: 0.13em;
   font-weight: 400;
+}
+
+@property --sweep {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 360deg;
+}
+
+.reveal a {
+  position: relative;
+  border: 0;
+  padding: 0 calc(0.5rem + 1px);
+  transition: box-shadow 0.2s, background-color 0.4s ease-out calc(var(--delay, 0s) + 0.45s);
+}
+
+.reveal a:nth-child(2) {
+  --delay: 0.25s;
+}
+
+.reveal a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--muted);
+  border-radius: inherit;
+  corner-shape: inherit;
+  pointer-events: none;
+  -webkit-mask: conic-gradient(from -90deg, #000 var(--sweep), transparent 0);
+  mask: conic-gradient(from -90deg, #000 var(--sweep), transparent 0);
+}
+
+.reveal.hidden a::after {
+  --sweep: 0deg;
+}
+
+.reveal:not(.hidden) a::after {
+  animation: sweep 0.55s cubic-bezier(0.45, 0, 0.25, 1) var(--delay, 0s) backwards;
+}
+
+@keyframes sweep {
+  from {
+    --sweep: 0deg;
+  }
+}
+
+.reveal a > * {
+  transition: opacity 0.5s ease-out calc(var(--delay, 0s) + 0.45s), transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--delay, 0s) + 0.45s);
+}
+
+.reveal.hidden a > * {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.reveal.hidden a:has(> img) {
+  background: transparent;
 }
 
 .icons .site {
