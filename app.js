@@ -33,10 +33,10 @@ async function typeText() {
 
   const [code, web, store] = document.querySelectorAll(".label");
   const lines = [
-    [document.querySelector(".email"), [[2500, "hello"], [2400, "@"], [1000, "sleeping"], [400, "coconut"], [450, "."], [350, "com"]]],
-    [code, [[1500, "code:"]]],
-    [web, [[1200, "web:"]]],
-    [store, [[1200, "store:"]]]
+    [document.querySelector(".email"), [[1250, "hello"], [1200, "@"], [500, "sleeping"], [200, "coconut"], [225, "."], [175, "com"]]],
+    [code, [[750, "code:"]]],
+    [web, [[600, "web:"]]],
+    [store, [[600, "store:"]]]
   ].map(([el, parts]) => {
     const icons = el.matches(".label") ? el.nextElementSibling : null;
     icons?.classList.add("reveal", "hidden");
@@ -49,15 +49,15 @@ async function typeText() {
     typed.append(cursor);
     for (const [delay, chunk] of parts) {
       for (let i = 0; i < chunk.length; i++) {
-        await wait(i ? 60 + Math.random() * 90 : delay);
+        await wait(i ? 30 + Math.random() * 45 : delay);
         cursor.classList.add("busy");
         out.appendData(chunk[i]);
       }
       cursor.classList.remove("busy");
     }
     if (icons) {
-      setTimeout(() => icons.classList.remove("hidden"), 400);
-      await wait(1500);
+      setTimeout(() => icons.classList.remove("hidden"), 200);
+      await wait(750);
     }
   }
 
