@@ -4,11 +4,23 @@ const coconuts = [
   { file: "img/coconut_3d_3.glb", author: "Mylom", source: "https://sketchfab.com/3d-models/coconut-8ed0693304144515b118ffebd7032371" }
 ];
 
+const emailParts = [[1250, "hello"], [1200, "@"], [500, "sleeping"], [200, "coconut"], [225, "."], [175, "com"]];
+const labelDelays = [750, 600, 600];
+const hurrySpeed = 12;
+
+const fieldOfView = 30;
+const modelFill = 0.66;
+const secondsPerTurn = 30;
+const maxSpin = Math.PI * 4;
+const spinEase = 1.5;
+const uprightEase = 1.2;
+const flickMs = 100;
+
 const coconut = coconuts[Math.floor(Math.random() * coconuts.length)];
 const coco = document.querySelector(".coco");
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const autoSpeed = reducedMotion ? 0 : Math.PI * 2 / secondsPerTurn;
 
-const hurrySpeed = 12;
 let speed = 1;
 const pending = new Map();
 
@@ -30,9 +42,6 @@ function hurry() {
   }
   pending.clear();
 }
-
-const emailParts = [[1250, "hello"], [1200, "@"], [500, "sleeping"], [200, "coconut"], [225, "."], [175, "com"]];
-const labelDelays = [750, 600, 600];
 
 function prepare(el) {
   const text = el.textContent;
@@ -130,76 +139,76 @@ const credit = document.createElement("p");
 credit.className = "credit";
 credit.append("3D model: ", link(coconut.source, coconut.author), document.createElement("br"), link("https://creativecommons.org/licenses/by/4.0/", "CC BY 4.0"));
 
-const fieldOfView = 30;
-const modelFill = 0.66;
-const secondsPerTurn = 30;
-const maxSpin = Math.PI * 4;
-const spinEase = 1.5;
-const uprightEase = 1.2;
-const flickMs = 100;
-const autoSpeed = reducedMotion ? 0 : Math.PI * 2 / secondsPerTurn;
-
-function startViewer() {
-  const xAxis = new THREE.Vector3(1, 0, 0);
-  const yAxis = new THREE.Vector3(0, 1, 0);
-  const upright = new THREE.Quaternion();
-
-  const canvas = document.createElement("canvas");
-  canvas.className = "viewer";
-  canvas.setAttribute("role", "img");
-  canvas.setAttribute("aria-label", "Sleeping Coconut");
-  canvas.addEventListener("webglcontextlost", fail);
-
-  let renderer;
-  try {
-    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  } catch {
-    fail();
-    return;
-  }
+function createRenderer(canvas) {
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.toneMapping = THREE.NeutralToneMapping;
+  return renderer;
+}
 
+function createScene(renderer) {
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
   pmrem.dispose();
-  const camera = new THREE.PerspectiveCamera(fieldOfView, 1, 0.01, 100);
-  const pivot = new THREE.Group();
-  scene.add(pivot);
+  return scene;
+}
 
+function frameModel(model, camera) {
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3());
+  model.position.sub(box.getCenter(new THREE.Vector3()));
+
+  const distance = Math.max(size.x, size.y, size.z) / 2 / (modelFill * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+  camera.position.z = distance;
+  camera.near = distance / 100;
+  camera.far = distance * 10;
+  camera.updateProjectionMatrix();
+}
+
+function createSpin(pivot) {
+  const xAxis = new THREE.Vector3(1, 0, 0);
+  const yAxis = new THREE.Vector3(0, 1, 0);
+  const upright = new THREE.Quaternion();
   const velocity = { x: 0, y: autoSpeed };
-  let dragging = false;
+
+  const spin = {
+    velocity,
+    dragging: false,
+    rotate(x, y) {
+      pivot.rotateOnWorldAxis(xAxis, x);
+      pivot.rotateOnWorldAxis(yAxis, y);
+    },
+    step(seconds) {
+      if (spin.dragging) return;
+      const blend = 1 - Math.exp(-seconds * spinEase);
+      velocity.x += (0 - velocity.x) * blend;
+      velocity.y += (autoSpeed - velocity.y) * blend;
+      spin.rotate(velocity.x * seconds, velocity.y * seconds);
+      const q = pivot.quaternion;
+      upright.set(0, q.y, 0, q.w);
+      if (upright.length() > 0.001) pivot.quaternion.slerp(upright.normalize(), 1 - Math.exp(-seconds * uprightEase));
+    },
+    moving() {
+      const q = pivot.quaternion;
+      return autoSpeed || spin.dragging || Math.hypot(velocity.x, velocity.y) > 0.001 || Math.abs(q.x) + Math.abs(q.z) > 0.0001;
+    }
+  };
+  return spin;
+}
+
+function clampSpin(speed) {
+  return Math.min(Math.max(speed, -maxSpin), maxSpin);
+}
+
+function enableDrag(canvas, spin, start) {
+  const { velocity } = spin;
   let pointer = null;
   let last = null;
 
-  function clampSpin(speed) {
-    return Math.min(Math.max(speed, -maxSpin), maxSpin);
-  }
-
-  function rotate(x, y) {
-    pivot.rotateOnWorldAxis(xAxis, x);
-    pivot.rotateOnWorldAxis(yAxis, y);
-  }
-
-  let running = false;
-  let previous = 0;
-
-  function start() {
-    if (running || failed) return;
-    running = true;
-    previous = performance.now();
-    requestAnimationFrame(frame);
-  }
-
-  function resize() {
-    renderer.setSize(coco.clientWidth, coco.clientWidth, false);
-    start();
-  }
-
   canvas.addEventListener("pointerdown", (event) => {
-    if (dragging || event.button !== 0) return;
-    dragging = true;
+    if (spin.dragging || event.button !== 0) return;
+    spin.dragging = true;
     pointer = event.pointerId;
     last = { x: event.clientX, y: event.clientY, time: event.timeStamp };
     velocity.x = 0;
@@ -209,20 +218,20 @@ function startViewer() {
   });
 
   canvas.addEventListener("pointermove", (event) => {
-    if (!dragging || event.pointerId !== pointer) return;
+    if (!spin.dragging || event.pointerId !== pointer) return;
     const factor = Math.PI / canvas.clientWidth;
     const x = (event.clientY - last.y) * factor;
     const y = (event.clientX - last.x) * factor;
     const seconds = Math.max((event.timeStamp - last.time) / 1000, 0.016);
-    rotate(x, y);
+    spin.rotate(x, y);
     velocity.x = clampSpin(x / seconds);
     velocity.y = clampSpin(y / seconds);
     last = { x: event.clientX, y: event.clientY, time: event.timeStamp };
   });
 
   const release = (event) => {
-    if (!dragging || event.pointerId !== pointer) return;
-    dragging = false;
+    if (!spin.dragging || event.pointerId !== pointer) return;
+    spin.dragging = false;
     if (reducedMotion || event.timeStamp - last.time > flickMs) {
       velocity.x = 0;
       velocity.y = 0;
@@ -231,44 +240,66 @@ function startViewer() {
   canvas.addEventListener("pointerup", release);
   canvas.addEventListener("pointercancel", release);
   canvas.addEventListener("lostpointercapture", release);
+}
+
+function createLoop(spin, render) {
+  let running = false;
+  let previous = 0;
 
   function frame(now) {
     if (failed) return;
     const seconds = Math.min((now - previous) / 1000, 0.1);
     previous = now;
-    if (!dragging) {
-      const blend = 1 - Math.exp(-seconds * spinEase);
-      velocity.x += (0 - velocity.x) * blend;
-      velocity.y += (autoSpeed - velocity.y) * blend;
-      rotate(velocity.x * seconds, velocity.y * seconds);
-      const q = pivot.quaternion;
-      upright.set(0, q.y, 0, q.w);
-      if (upright.length() > 0.001) pivot.quaternion.slerp(upright.normalize(), 1 - Math.exp(-seconds * uprightEase));
-    }
-    renderer.render(scene, camera);
-    const moving = autoSpeed || dragging || Math.hypot(velocity.x, velocity.y) > 0.001 || Math.abs(pivot.quaternion.x) + Math.abs(pivot.quaternion.z) > 0.0001;
-    if (moving) requestAnimationFrame(frame);
+    spin.step(seconds);
+    render();
+    if (spin.moving()) requestAnimationFrame(frame);
     else running = false;
+  }
+
+  return function start() {
+    if (running || failed) return;
+    running = true;
+    previous = performance.now();
+    requestAnimationFrame(frame);
+  };
+}
+
+function startViewer() {
+  const canvas = document.createElement("canvas");
+  canvas.className = "viewer";
+  canvas.setAttribute("role", "img");
+  canvas.setAttribute("aria-label", "Sleeping Coconut");
+  canvas.addEventListener("webglcontextlost", fail);
+
+  let renderer;
+  try {
+    renderer = createRenderer(canvas);
+  } catch {
+    fail();
+    return;
+  }
+
+  const scene = createScene(renderer);
+  const camera = new THREE.PerspectiveCamera(fieldOfView, 1, 0.01, 100);
+  const pivot = new THREE.Group();
+  scene.add(pivot);
+
+  const spin = createSpin(pivot);
+  const start = createLoop(spin, () => renderer.render(scene, camera));
+  enableDrag(canvas, spin, start);
+
+  function resize() {
+    renderer.setSize(coco.clientWidth, coco.clientWidth, false);
+    start();
   }
 
   new THREE.GLTFLoader().load(coconut.file, (gltf) => {
     if (failed) return;
-    const model = gltf.scene;
-    const box = new THREE.Box3().setFromObject(model);
-    const size = box.getSize(new THREE.Vector3());
-    model.position.sub(box.getCenter(new THREE.Vector3()));
-    pivot.add(model);
-
-    const distance = Math.max(size.x, size.y, size.z) / 2 / (modelFill * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
-    camera.position.z = distance;
-    camera.near = distance / 100;
-    camera.far = distance * 10;
-    camera.updateProjectionMatrix();
-
+    frameModel(gltf.scene, camera);
+    pivot.add(gltf.scene);
     resize();
     new ResizeObserver(resize).observe(coco);
     coco.append(canvas);
-    start();
     requestAnimationFrame(() => requestAnimationFrame(() => {
       if (failed) return;
       coco.classList.add("ready");
