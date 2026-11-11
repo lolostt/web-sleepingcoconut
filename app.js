@@ -8,7 +8,27 @@ const coconut = coconuts[Math.floor(Math.random() * coconuts.length)];
 const coco = document.querySelector(".coco");
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+let speed = 1;
+const pending = new Map();
+
+function wait(ms) {
+  return new Promise((resolve) => {
+    const id = setTimeout(() => {
+      pending.delete(id);
+      resolve();
+    }, ms / speed);
+    pending.set(id, resolve);
+  });
+}
+
+function hurry() {
+  speed = 12;
+  for (const [id, resolve] of pending) {
+    clearTimeout(id);
+    resolve();
+  }
+  pending.clear();
+}
 
 const emailParts = [[1250, "hello"], [1200, "@"], [500, "sleeping"], [200, "coconut"], [225, "."], [175, "com"]];
 const labelDelays = [750, 600, 600];
@@ -34,6 +54,15 @@ function chunks(text, parts) {
   return parts.map(([, chunk]) => chunk).join("") === text ? parts : [[parts[0][0], text]];
 }
 
+function hide(icons, hidden) {
+  icons.classList.add("reveal");
+  icons.classList.toggle("hidden", hidden);
+  for (const a of icons.querySelectorAll("a")) {
+    if (hidden) a.tabIndex = -1;
+    else a.removeAttribute("tabindex");
+  }
+}
+
 async function typeText() {
   const cursor = document.createElement("span");
   cursor.className = "cursor";
@@ -41,13 +70,21 @@ async function typeText() {
   const email = document.querySelector(".email");
   const lines = [email, ...document.querySelectorAll(".label")].map((el, i) => {
     const icons = el.matches(".label") ? el.nextElementSibling : null;
-    icons?.classList.add("reveal", "hidden");
+    if (icons) hide(icons, true);
     const { text, typed, out } = prepare(el);
     const parts = i ? [[labelDelays[i - 1] ?? labelDelays.at(-1), text]] : chunks(text, emailParts);
     return { typed, out, parts, icons };
   });
 
   document.documentElement.classList.add("ready");
+
+  const listening = new AbortController();
+  for (const type of ["pointerdown", "keydown"]) {
+    addEventListener(type, () => {
+      hurry();
+      listening.abort();
+    }, { signal: listening.signal });
+  }
 
   for (const { typed, out, parts, icons } of lines) {
     typed.append(cursor);
@@ -60,11 +97,12 @@ async function typeText() {
       cursor.classList.remove("busy");
     }
     if (icons) {
-      setTimeout(() => icons.classList.remove("hidden"), 200);
+      wait(200).then(() => hide(icons, false));
       await wait(750);
     }
   }
 
+  listening.abort();
   document.querySelector(".build").append(cursor);
 }
 
