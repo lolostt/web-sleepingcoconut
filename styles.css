@@ -68,6 +68,12 @@ main {
   text-align: center;
 }
 
+@media (max-height: 40rem) {
+  main {
+    padding-bottom: 2.75rem;
+  }
+}
+
 .coco {
   position: relative;
 }
