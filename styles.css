@@ -412,3 +412,38 @@ main {
 .reason {
   color: var(--muted);
 }
+
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+@media (max-width: 30rem) {
+  .message {
+    align-items: center;
+  }
+}
+
+.home {
+  color: var(--muted);
+  font-size: clamp(0.8rem, 4vw, 1rem);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.home:hover,
+.home:focus-visible {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.home:focus-visible {
+  outline: 2px solid var(--muted);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
