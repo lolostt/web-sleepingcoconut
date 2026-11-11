@@ -113,9 +113,16 @@ function fail() {
   coco.classList.add("failed");
 }
 
+function link(href, text) {
+  const a = document.createElement("a");
+  a.href = href;
+  a.textContent = text;
+  return a;
+}
+
 const credit = document.createElement("p");
 credit.className = "credit";
-credit.innerHTML = `3D model: <a href="${coconut.source}">${coconut.author}</a><br><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>`;
+credit.append("3D model: ", link(coconut.source, coconut.author), document.createElement("br"), link("https://creativecommons.org/licenses/by/4.0/", "CC BY 4.0"));
 
 const autoSpeed = reducedMotion ? 0 : Math.PI * 2 / 30;
 
