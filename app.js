@@ -126,7 +126,7 @@ let failed = false;
 function fail(reason) {
   console.warn("3D viewer failed:", reason);
   failed = true;
-  coco.classList.remove("ready");
+  coco.classList.remove("loaded");
   coco.classList.add("failed");
   coco.querySelector(".viewer")?.remove();
   credit.remove();
@@ -305,7 +305,7 @@ function startViewer() {
     coco.append(canvas);
     requestAnimationFrame(() => requestAnimationFrame(() => {
       if (failed) return;
-      coco.classList.add("ready");
+      coco.classList.add("loaded");
       coco.parentElement.append(credit);
     }));
   }, undefined, fail);

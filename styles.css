@@ -109,11 +109,11 @@ main {
   cursor: grabbing;
 }
 
-.coco.ready .viewer {
+.coco.loaded .viewer {
   opacity: 1;
 }
 
-.coco.ready .logo {
+.coco.loaded .logo {
   opacity: 0;
 }
 
@@ -413,7 +413,7 @@ main {
   height: 1.75rem;
 }
 
-.gif {
+.art {
   display: block;
   width: auto;
   height: min(229px, 50vw);
