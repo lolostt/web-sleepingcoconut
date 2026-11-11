@@ -436,7 +436,7 @@ main {
 .message {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 0.5rem;
 }
 
@@ -454,6 +454,14 @@ main {
   border-bottom: 1px solid transparent;
   padding-bottom: 2px;
   transition: color 0.2s, border-color 0.2s;
+}
+
+.home svg {
+  width: 1em;
+  height: 1.125em;
+  margin-right: 0.375em;
+  vertical-align: -0.125em;
+  shape-rendering: crispEdges;
 }
 
 .home:hover,
