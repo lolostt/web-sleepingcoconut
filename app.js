@@ -108,9 +108,14 @@ async function typeText() {
 
 if (!reducedMotion) typeText();
 
+let failed = false;
+
 function fail() {
+  failed = true;
   coco.classList.remove("ready");
   coco.classList.add("failed");
+  coco.querySelector(".viewer")?.remove();
+  credit.remove();
 }
 
 function link(href, text) {
@@ -148,7 +153,9 @@ function startViewer() {
   renderer.toneMapping = THREE.NeutralToneMapping;
 
   const scene = new THREE.Scene();
-  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+  pmrem.dispose();
   const camera = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
   const pivot = new THREE.Group();
   scene.add(pivot);
@@ -162,8 +169,19 @@ function startViewer() {
     pivot.rotateOnWorldAxis(yAxis, y);
   }
 
+  let running = false;
+  let previous = 0;
+
+  function start() {
+    if (running || failed) return;
+    running = true;
+    previous = performance.now();
+    requestAnimationFrame(frame);
+  }
+
   function resize() {
     renderer.setSize(coco.clientWidth, coco.clientWidth, false);
+    start();
   }
 
   canvas.addEventListener("pointerdown", (event) => {
@@ -172,6 +190,7 @@ function startViewer() {
     velocity.x = 0;
     velocity.y = 0;
     canvas.setPointerCapture(event.pointerId);
+    start();
   });
 
   canvas.addEventListener("pointermove", (event) => {
@@ -197,8 +216,8 @@ function startViewer() {
   canvas.addEventListener("pointerup", release);
   canvas.addEventListener("pointercancel", release);
 
-  let previous = performance.now();
   function frame(now) {
+    if (failed) return;
     const seconds = Math.min((now - previous) / 1000, 0.1);
     previous = now;
     if (!dragging) {
@@ -211,10 +230,13 @@ function startViewer() {
       if (upright.length() > 0.001) pivot.quaternion.slerp(upright.normalize(), 1 - Math.exp(-seconds * 1.2));
     }
     renderer.render(scene, camera);
-    requestAnimationFrame(frame);
+    const moving = autoSpeed || dragging || Math.hypot(velocity.x, velocity.y) > 0.001 || Math.abs(pivot.quaternion.x) + Math.abs(pivot.quaternion.z) > 0.0001;
+    if (moving) requestAnimationFrame(frame);
+    else running = false;
   }
 
   new THREE.GLTFLoader().load(coconut.file, (gltf) => {
+    if (failed) return;
     const model = gltf.scene;
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
@@ -230,8 +252,9 @@ function startViewer() {
     resize();
     new ResizeObserver(resize).observe(coco);
     coco.append(canvas);
-    requestAnimationFrame(frame);
+    start();
     requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (failed) return;
       coco.classList.add("ready");
       coco.parentElement.append(credit);
     }));
