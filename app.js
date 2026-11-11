@@ -46,16 +46,19 @@ function hurry() {
 function prepare(el) {
   const text = el.textContent;
   const wrap = document.createElement("span");
+  const label = document.createElement("span");
   const ghost = document.createElement("span");
   const typed = document.createElement("span");
   const out = document.createTextNode("");
   wrap.className = "typing";
+  label.className = "sr-only";
+  label.textContent = text;
   ghost.className = "ghost";
   ghost.textContent = text;
   ghost.setAttribute("aria-hidden", "true");
+  typed.setAttribute("aria-hidden", "true");
   typed.append(out);
-  wrap.append(ghost, typed);
-  if (el.matches("a")) el.setAttribute("aria-label", text);
+  wrap.append(label, ghost, typed);
   el.replaceChildren(wrap);
   return { text, typed, out };
 }
@@ -268,8 +271,7 @@ function createLoop(spin, render) {
 function startViewer() {
   const canvas = document.createElement("canvas");
   canvas.className = "viewer";
-  canvas.setAttribute("role", "img");
-  canvas.setAttribute("aria-label", "Sleeping Coconut");
+  canvas.setAttribute("aria-hidden", "true");
   canvas.addEventListener("webglcontextlost", () => fail("WebGL context lost"));
 
   let renderer;
