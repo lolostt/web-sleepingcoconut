@@ -206,12 +206,14 @@ main {
 
 @media (prefers-reduced-motion: no-preference) {
   .js:not(.ready) :is(.email, .label, .icons) {
-    visibility: hidden;
+    animation: wait-for-script 3s;
   }
+}
 
-  .js:not(.ready) .icons {
-    opacity: 0;
-    transform: translateX(0.75rem);
+@keyframes wait-for-script {
+  from,
+  to {
+    visibility: hidden;
   }
 }
 
