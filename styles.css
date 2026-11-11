@@ -80,7 +80,11 @@ main {
 }
 
 .coco .logo {
-  animation: appear 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1s backwards;
+  animation: appear 1.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.js .coco .logo {
+  animation-delay: 1s;
 }
 
 .viewer {
