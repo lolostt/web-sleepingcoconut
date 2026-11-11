@@ -10,6 +10,9 @@ const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const emailParts = [[1250, "hello"], [1200, "@"], [500, "sleeping"], [200, "coconut"], [225, "."], [175, "com"]];
+const labelDelays = [750, 600, 600];
+
 function prepare(el) {
   const text = el.textContent;
   const wrap = document.createElement("span");
@@ -24,23 +27,24 @@ function prepare(el) {
   wrap.append(ghost, typed);
   if (el.matches("a")) el.setAttribute("aria-label", text);
   el.replaceChildren(wrap);
-  return { typed, out };
+  return { text, typed, out };
+}
+
+function chunks(text, parts) {
+  return parts.map(([, chunk]) => chunk).join("") === text ? parts : [[parts[0][0], text]];
 }
 
 async function typeText() {
   const cursor = document.createElement("span");
   cursor.className = "cursor";
 
-  const [code, web, store] = document.querySelectorAll(".label");
-  const lines = [
-    [document.querySelector(".email"), [[1250, "hello"], [1200, "@"], [500, "sleeping"], [200, "coconut"], [225, "."], [175, "com"]]],
-    [code, [[750, "code:"]]],
-    [web, [[600, "web:"]]],
-    [store, [[600, "store:"]]]
-  ].map(([el, parts]) => {
+  const email = document.querySelector(".email");
+  const lines = [email, ...document.querySelectorAll(".label")].map((el, i) => {
     const icons = el.matches(".label") ? el.nextElementSibling : null;
     icons?.classList.add("reveal", "hidden");
-    return { ...prepare(el), parts, icons };
+    const { text, typed, out } = prepare(el);
+    const parts = i ? [[labelDelays[i - 1] ?? labelDelays.at(-1), text]] : chunks(text, emailParts);
+    return { typed, out, parts, icons };
   });
 
   document.documentElement.classList.add("ready");
