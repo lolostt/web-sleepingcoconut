@@ -14,7 +14,10 @@
 </head>
 <body>
   <main>
-    <img class="art" src="/img/error_5xx.webp" alt="" width="236" height="229">
+    <picture>
+      <source srcset="/img/error_5xx_still.webp" media="(prefers-reduced-motion: reduce)">
+      <img class="art" src="/img/error_5xx.webp" alt="" width="236" height="229">
+    </picture>
     <div class="message">
       <h1 class="error">error 500 <span class="reason">internal server error</span></h1>
       <a class="home" href="/">home</a>
