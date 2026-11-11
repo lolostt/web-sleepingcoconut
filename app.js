@@ -120,7 +120,8 @@ if (!reducedMotion) typeText();
 
 let failed = false;
 
-function fail() {
+function fail(reason) {
+  console.warn("3D viewer failed:", reason);
   failed = true;
   coco.classList.remove("ready");
   coco.classList.add("failed");
@@ -269,13 +270,13 @@ function startViewer() {
   canvas.className = "viewer";
   canvas.setAttribute("role", "img");
   canvas.setAttribute("aria-label", "Sleeping Coconut");
-  canvas.addEventListener("webglcontextlost", fail);
+  canvas.addEventListener("webglcontextlost", () => fail("WebGL context lost"));
 
   let renderer;
   try {
     renderer = createRenderer(canvas);
-  } catch {
-    fail();
+  } catch (error) {
+    fail(error);
     return;
   }
 
@@ -308,4 +309,4 @@ function startViewer() {
   }, undefined, fail);
 }
 
-addEventListener("DOMContentLoaded", () => window.THREE ? startViewer() : fail());
+addEventListener("DOMContentLoaded", () => window.THREE ? startViewer() : fail("three.js did not load"));
