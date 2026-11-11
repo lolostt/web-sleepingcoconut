@@ -130,6 +130,7 @@ credit.className = "credit";
 credit.append("3D model: ", link(coconut.source, coconut.author), document.createElement("br"), link("https://creativecommons.org/licenses/by/4.0/", "CC BY 4.0"));
 
 const autoSpeed = reducedMotion ? 0 : Math.PI * 2 / 30;
+const maxSpin = Math.PI * 4;
 
 function startViewer() {
   const xAxis = new THREE.Vector3(1, 0, 0);
@@ -162,7 +163,12 @@ function startViewer() {
 
   const velocity = { x: 0, y: autoSpeed };
   let dragging = false;
+  let pointer = null;
   let last = null;
+
+  function clampSpin(speed) {
+    return Math.min(Math.max(speed, -maxSpin), maxSpin);
+  }
 
   function rotate(x, y) {
     pivot.rotateOnWorldAxis(xAxis, x);
@@ -185,7 +191,9 @@ function startViewer() {
   }
 
   canvas.addEventListener("pointerdown", (event) => {
+    if (dragging || event.button !== 0) return;
     dragging = true;
+    pointer = event.pointerId;
     last = { x: event.clientX, y: event.clientY, time: event.timeStamp };
     velocity.x = 0;
     velocity.y = 0;
@@ -194,19 +202,19 @@ function startViewer() {
   });
 
   canvas.addEventListener("pointermove", (event) => {
-    if (!dragging) return;
+    if (!dragging || event.pointerId !== pointer) return;
     const factor = Math.PI / canvas.clientWidth;
     const x = (event.clientY - last.y) * factor;
     const y = (event.clientX - last.x) * factor;
-    const seconds = Math.max((event.timeStamp - last.time) / 1000, 0.001);
+    const seconds = Math.max((event.timeStamp - last.time) / 1000, 0.016);
     rotate(x, y);
-    velocity.x = x / seconds;
-    velocity.y = y / seconds;
+    velocity.x = clampSpin(x / seconds);
+    velocity.y = clampSpin(y / seconds);
     last = { x: event.clientX, y: event.clientY, time: event.timeStamp };
   });
 
   const release = (event) => {
-    if (!dragging) return;
+    if (!dragging || event.pointerId !== pointer) return;
     dragging = false;
     if (reducedMotion || event.timeStamp - last.time > 100) {
       velocity.x = 0;
@@ -215,6 +223,7 @@ function startViewer() {
   };
   canvas.addEventListener("pointerup", release);
   canvas.addEventListener("pointercancel", release);
+  canvas.addEventListener("lostpointercapture", release);
 
   function frame(now) {
     if (failed) return;
