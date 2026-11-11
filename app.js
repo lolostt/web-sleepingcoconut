@@ -8,6 +8,7 @@ const coconut = coconuts[Math.floor(Math.random() * coconuts.length)];
 const coco = document.querySelector(".coco");
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+const hurrySpeed = 12;
 let speed = 1;
 const pending = new Map();
 
@@ -22,7 +23,7 @@ function wait(ms) {
 }
 
 function hurry() {
-  speed = 12;
+  speed = hurrySpeed;
   for (const [id, resolve] of pending) {
     clearTimeout(id);
     resolve();
@@ -129,8 +130,14 @@ const credit = document.createElement("p");
 credit.className = "credit";
 credit.append("3D model: ", link(coconut.source, coconut.author), document.createElement("br"), link("https://creativecommons.org/licenses/by/4.0/", "CC BY 4.0"));
 
-const autoSpeed = reducedMotion ? 0 : Math.PI * 2 / 30;
+const fieldOfView = 30;
+const modelFill = 0.66;
+const secondsPerTurn = 30;
 const maxSpin = Math.PI * 4;
+const spinEase = 1.5;
+const uprightEase = 1.2;
+const flickMs = 100;
+const autoSpeed = reducedMotion ? 0 : Math.PI * 2 / secondsPerTurn;
 
 function startViewer() {
   const xAxis = new THREE.Vector3(1, 0, 0);
@@ -157,7 +164,7 @@ function startViewer() {
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
   pmrem.dispose();
-  const camera = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
+  const camera = new THREE.PerspectiveCamera(fieldOfView, 1, 0.01, 100);
   const pivot = new THREE.Group();
   scene.add(pivot);
 
@@ -216,7 +223,7 @@ function startViewer() {
   const release = (event) => {
     if (!dragging || event.pointerId !== pointer) return;
     dragging = false;
-    if (reducedMotion || event.timeStamp - last.time > 100) {
+    if (reducedMotion || event.timeStamp - last.time > flickMs) {
       velocity.x = 0;
       velocity.y = 0;
     }
@@ -230,13 +237,13 @@ function startViewer() {
     const seconds = Math.min((now - previous) / 1000, 0.1);
     previous = now;
     if (!dragging) {
-      const blend = 1 - Math.exp(-seconds * 1.5);
+      const blend = 1 - Math.exp(-seconds * spinEase);
       velocity.x += (0 - velocity.x) * blend;
       velocity.y += (autoSpeed - velocity.y) * blend;
       rotate(velocity.x * seconds, velocity.y * seconds);
       const q = pivot.quaternion;
       upright.set(0, q.y, 0, q.w);
-      if (upright.length() > 0.001) pivot.quaternion.slerp(upright.normalize(), 1 - Math.exp(-seconds * 1.2));
+      if (upright.length() > 0.001) pivot.quaternion.slerp(upright.normalize(), 1 - Math.exp(-seconds * uprightEase));
     }
     renderer.render(scene, camera);
     const moving = autoSpeed || dragging || Math.hypot(velocity.x, velocity.y) > 0.001 || Math.abs(pivot.quaternion.x) + Math.abs(pivot.quaternion.z) > 0.0001;
@@ -252,7 +259,7 @@ function startViewer() {
     model.position.sub(box.getCenter(new THREE.Vector3()));
     pivot.add(model);
 
-    const distance = Math.max(size.x, size.y, size.z) / 2 / (0.66 * Math.tan(THREE.MathUtils.degToRad(15)));
+    const distance = Math.max(size.x, size.y, size.z) / 2 / (modelFill * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
     camera.position.z = distance;
     camera.near = distance / 100;
     camera.far = distance * 10;
