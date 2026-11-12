@@ -293,7 +293,6 @@ main {
   padding: 0 0.5rem;
   border: 1px solid var(--muted);
   border-radius: calc(var(--box-h) * 0.2237);
-  overflow: hidden;
   gap: 0.5rem;
   text-decoration: none;
   color: var(--brand);
@@ -318,7 +317,7 @@ main {
 }
 
 .icons a:has(> img) {
-  background: #ffffff;
+  background: #ffffff padding-box;
 }
 
 .icons svg {
@@ -351,8 +350,7 @@ main {
 
 .reveal a {
   position: relative;
-  border: 0;
-  padding: 0 calc(0.5rem + 1px);
+  border-color: transparent;
   transition: box-shadow 0.2s, background-color 0.4s ease-out calc(var(--delay, 0s) + 0.45s);
 }
 
@@ -363,7 +361,7 @@ main {
 .reveal a::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -1px;
   border: 1px solid var(--muted);
   border-radius: inherit;
   corner-shape: inherit;
