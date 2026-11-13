@@ -1,7 +1,7 @@
 const coconuts = [
-  { file: "img/coconut_3d_1.glb", author: "Meerschaum Digital", source: "https://sketchfab.com/3d-models/coconut-game-ready-2k-pbr-49a8eaee73a943e08fb77049f8b0d16d" },
-  { file: "img/coconut_3d_2.glb", author: "matousekfoto", source: "https://sketchfab.com/3d-models/coconut-afe3221922ef4bdbb0cb25a2656e1afb" },
-  { file: "img/coconut_3d_3.glb", author: "Mylom", source: "https://sketchfab.com/3d-models/coconut-8ed0693304144515b118ffebd7032371" }
+  { file: "img/coconut_3d_1.glb", eyes: [0.131, -0.322, -0.938], author: "Meerschaum Digital", source: "https://sketchfab.com/3d-models/coconut-game-ready-2k-pbr-49a8eaee73a943e08fb77049f8b0d16d" },
+  { file: "img/coconut_3d_2.glb", eyes: [0.156, -0.784, -0.601], author: "matousekfoto", source: "https://sketchfab.com/3d-models/coconut-afe3221922ef4bdbb0cb25a2656e1afb" },
+  { file: "img/coconut_3d_3.glb", eyes: [0.199, 0.724, 0.661], author: "Mylom", source: "https://sketchfab.com/3d-models/coconut-8ed0693304144515b118ffebd7032371" }
 ];
 
 const emailParts = [[1250, "hello"], [1200, "@"], [500, "sleeping"], [200, "coconut"], [225, "."], [175, "com"]];
@@ -14,6 +14,7 @@ const secondsPerTurn = 30;
 const spinEase = 1.5;
 const uprightEase = 1.2;
 const flickMs = 100;
+const eyesFacing = [-0.42, -0.42, 0.8];
 
 const coconut = coconuts[Math.floor(Math.random() * coconuts.length)];
 const coco = document.querySelector(".coco");
@@ -157,6 +158,11 @@ function createScene(renderer) {
   return scene;
 }
 
+function faceEyes(model) {
+  const eyes = new THREE.Vector3(...coconut.eyes).normalize();
+  model.quaternion.setFromUnitVectors(eyes, new THREE.Vector3(...eyesFacing).normalize());
+}
+
 function frameModel(model, camera) {
   const box = new THREE.Box3().setFromObject(model);
   const size = box.getSize(new THREE.Vector3());
@@ -294,7 +300,10 @@ function startViewer() {
   new THREE.GLTFLoader().load(coconut.file, (gltf) => {
     if (failed) return;
     frameModel(gltf.scene, camera);
-    pivot.add(gltf.scene);
+    const turned = new THREE.Group();
+    turned.add(gltf.scene);
+    faceEyes(turned);
+    pivot.add(turned);
     resize();
     new ResizeObserver(resize).observe(coco);
     coco.append(canvas);
