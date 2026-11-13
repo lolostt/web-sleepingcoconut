@@ -11,7 +11,6 @@ const hurrySpeed = 12;
 const fieldOfView = 30;
 const modelFill = 0.66;
 const secondsPerTurn = 30;
-const maxSpin = Math.PI * 4;
 const spinEase = 1.5;
 const uprightEase = 1.2;
 const flickMs = 100;
@@ -201,10 +200,6 @@ function createSpin(pivot) {
   return spin;
 }
 
-function clampSpin(speed) {
-  return Math.min(Math.max(speed, -maxSpin), maxSpin);
-}
-
 function enableDrag(canvas, spin, start) {
   const { velocity } = spin;
   let pointer = null;
@@ -226,10 +221,10 @@ function enableDrag(canvas, spin, start) {
     const factor = Math.PI / canvas.clientWidth;
     const x = (event.clientY - last.y) * factor;
     const y = (event.clientX - last.x) * factor;
-    const seconds = Math.max((event.timeStamp - last.time) / 1000, 0.016);
+    const seconds = Math.max((event.timeStamp - last.time) / 1000, 0.001);
     spin.rotate(x, y);
-    velocity.x = clampSpin(x / seconds);
-    velocity.y = clampSpin(y / seconds);
+    velocity.x = x / seconds;
+    velocity.y = y / seconds;
     last = { x: event.clientX, y: event.clientY, time: event.timeStamp };
   });
 
