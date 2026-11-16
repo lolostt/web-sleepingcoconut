@@ -70,10 +70,7 @@ function chunks(text, parts) {
 function hide(icons, hidden) {
   icons.classList.add("reveal");
   icons.classList.toggle("hidden", hidden);
-  for (const a of icons.querySelectorAll("a")) {
-    if (hidden) a.tabIndex = -1;
-    else a.removeAttribute("tabindex");
-  }
+  icons.inert = hidden;
 }
 
 async function typeText() {
